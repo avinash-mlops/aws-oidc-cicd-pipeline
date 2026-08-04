@@ -1,10 +1,12 @@
 # AWS OIDC CI/CD Pipeline - Lab Guide
 
-This is the lab I set up to learn how GitHub Actions talks to AWS **without storing AWS keys in GitHub**.
+Created by Rajinikanth Vadla
 
-Push code to `main` → GitHub builds a Docker image → OIDC login to AWS → push image to ECR → SSH to EC2 → pull and run the container.
+This is the lab I set up to learn how GitHub Actions talks to AWS without storing AWS keys in GitHub.
 
-The app inside the container is a **tiny real LLM** (SmolLM2-135M). You can stream tokens in the browser after deploy.
+Push code to `main` -> GitHub builds a Docker image -> OIDC login to AWS -> push image to ECR -> SSH to EC2 -> pull and run the container.
+
+The app inside the container is a tiny real LLM (SmolLM2-135M). You can stream tokens in the browser after deploy.
 
 ---
 
@@ -462,3 +464,11 @@ For production I'd swap SSH deploy for ECS/EKS/CodeDeploy - but this lab is enou
 ---
 
 Lab done when: Actions green + http://EC2_IP:3000/demo streams text + /health returns ok.
+
+---
+
+## References and Notes
+
+Full notes and workflow details: https://app.notion.com/p/rajinikanthvadla/AWS-OIDC-CI-CD-Pipeline-deploy-yml-Notes-3b270173137780f689cdfe784784081c?source=copy_link
+
+Created by: Rajinikanth Vadla
