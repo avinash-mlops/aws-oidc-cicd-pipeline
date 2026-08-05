@@ -113,13 +113,52 @@ Replace the whole JSON with this (change **YOUR_ACCOUNT_ID** and **YOUR_GITHUB_U
 }
 ```
 
-Save it.
+Option A: Permissive (allows all branches and actions)
+
+Replace these placeholders:
+- YOUR_ACCOUNT_ID: your 12-digit AWS account ID
+- YOUR_GITHUB_USER: your GitHub username
+- YOUR_REPO: your repository name
+
+Example:
+```json
+"token.actions.githubusercontent.com:sub": "repo:rajinikanthvadla-ai/aws-oidc-cicd-pipeline:*"
+```
+
+Option B: Restrictive (specific branch only - more secure)
+
+Use this format with GitHub user ID, repo ID, and branch:
+
+```json
+"token.actions.githubusercontent.com:sub": "repo:YOUR_GITHUB_USER@YOUR_USER_ID/YOUR_REPO@YOUR_REPO_ID:ref:refs/heads/main"
+```
+
+Example:
+```json
+"token.actions.githubusercontent.com:sub": "repo:rajinikanthvadla-ai@202685866/aws-oidc-cicd-pipeline@1323039815:ref:refs/heads/main"
+```
+
+Get your GitHub IDs using the API (no CloudTrail needed):
+
+User ID:
+```bash
+curl -s https://api.github.com/users/YOUR_GITHUB_USER | jq '.id'
+```
+
+Repo ID:
+```bash
+curl -s https://api.github.com/repos/YOUR_GITHUB_USER/YOUR_REPO | jq '.id'
+```
+
+Recommendation: Use Option B (specific format) for production - it restricts OIDC to your main branch only. Use Option A for testing/lab environments.
+
+After pasting and replacing, save the trust policy.
 
 Copy the **Role ARN** from the role summary page. Mine looks like:
 
-`arn:aws:iam::123456789012:role/github-actions-deploy`
+`arn:aws:iam::559352513391:role/github-actions-deploy111`
 
-Keep this ARN — you paste it in the workflow file in Step 8.
+Update your workflow file (deploy.yml) with this exact ARN in Step 8.
 
 ---
 
