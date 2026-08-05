@@ -22,7 +22,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::172030247343:role/github-actions-deploy #u pdated my aws account id
+          role-to-assume: arn:aws:iam::172030247343:role/github-actions-deploy # updated my aws account id
                           
           aws-region: ${{ env.AWS_REGION }}
 
