@@ -17,13 +17,13 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::559352513391:role/github-actions-deploy
+          role-to-assume: arn:aws:iam::172030247343:role/github-actions-deploy
+                          
           aws-region: ${{ env.AWS_REGION }}
 
       - uses: aws-actions/amazon-ecr-login@v2
@@ -44,7 +44,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             aws ecr get-login-password --region ap-south-1 | \
-              docker login --username AWS --password-stdin 559352513391.dkr.ecr.ap-south-1.amazonaws.com
+              docker login --username AWS --password-stdin 172030247343.dkr.ecr.ap-south-1.amazonaws.com
             docker pull ${{ env.IMAGE }}
             docker stop my-app || true
             docker rm my-app || true
