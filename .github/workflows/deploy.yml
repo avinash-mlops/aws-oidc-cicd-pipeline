@@ -2,7 +2,8 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -12,29 +13,32 @@ permissions:
 env:
   AWS_REGION: ap-south-1
   ECR_REPO: my-app
+  ECR_REGISTRY: 172030247343.dkr.ecr.ap-south-1.amazonaws.com
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: arn:aws:iam::172030247343:role/github-actions-deploy #updated my aws id
-                          
+          role-to-assume: arn:aws:iam::172030247343:role/github-actions-deploy
           aws-region: ${{ env.AWS_REGION }}
 
-      - uses: aws-actions/amazon-ecr-login@v2
-        id: ecr
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push
+      - name: Build and push Docker image
         run: |
-          IMAGE=${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ env.IMAGE_TAG }}
-          docker build -t $IMAGE .
-          docker push $IMAGE
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}"
+          docker build -t "$IMAGE_URI" .
+          docker push "$IMAGE_URI"
+          echo "IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1
@@ -42,13 +46,20 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: AWS_REGION,ECR_REGISTRY,IMAGE_URI
           script: |
-            aws ecr get-login-password --region ap-south-1 | \
-            docker login --username AWS --password-stdin 172030247343.dkr.ecr.ap-south-1.amazonaws.com/my-app
-            docker pull ${{ env.IMAGE }}
+            set -e
+
+            aws ecr get-login-password --region "$AWS_REGION" | \
+              docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+            docker pull "$IMAGE_URI"
             docker stop my-app || true
             docker rm my-app || true
-            docker run -d --name my-app -p 3000:3000 \
+
+            docker run -d \
+              --name my-app \
+              -p 3000:3000 \
               --memory=2g \
-              -e MODEL_VERSION=${{ github.sha }} \
-              ${{ env.IMAGE }}
+              -e MODEL_VERSION="${IMAGE_URI##*:}" \
+              "$IMAGE_URI"
