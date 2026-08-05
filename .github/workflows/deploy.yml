@@ -22,7 +22,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::172030247343:role/github-actions-deploy
+          role-to-assume: arn:aws:iam::172030247343:role/github-actions-deploy #update aws id
                           
           aws-region: ${{ env.AWS_REGION }}
 
@@ -44,7 +44,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             aws ecr get-login-password --region ap-south-1 | \
-              docker login --username AWS --password-stdin 172030247343.dkr.ecr.ap-south-1.amazonaws.com
+            docker login --username AWS --password-stdin 172030247343.dkr.ecr.ap-south-1.amazonaws.com
             docker pull ${{ env.IMAGE }}
             docker stop my-app || true
             docker rm my-app || true
